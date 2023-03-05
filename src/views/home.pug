@@ -4,7 +4,18 @@ html(lang="en")
         meta(charset="UTF-8")
         meta(http-equiv="X-UA-Compatible", content="IE=edge")
         meta(name="viewport", content="width=device-width, initial-scale=1.0")
+        link(rel="stylesheet", href="https://unpkg.com/mvp.css@1.12/mvp.css")
         title Document
-    body 
-        h1 It works!
-        script(src="/public/js/app.js") 
+    body
+        header
+            h1 It works!
+        main 
+            h2 Welcome RTC
+            ul
+            form#nickname
+                input( type="text", placeholder="choos a nickname" require)
+                button Save
+            form#message
+                input( id="message" type="text", placeholder="wirte a msg" require)
+                button Send
+        script(src="/public/js/app.js")
