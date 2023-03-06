@@ -1,50 +1,36 @@
-const messageList = document.querySelector ("ul");
-const messageForm = document.querySelector("#message");
-const nickForm = document.querySelector("#nickname");
+const socket = io();
 
-const socket = new WebSocket(`ws://${window.location.host}`);
+const welcome = document.getElementById('welcome')
+const form = welcome.querySelector('form');
+const room = document.getElementById('room');
 
-//메세지 형식 맞추기
-const makeMessage = (type, payload) => {
-    const msg = {type, payload}
-    return JSON.stringify(msg);
+room.hidden = true;
+let roomName;
+
+const addMessage = (message) => {
+    const ul = room.querySelector('ul')
+    const li = document.createElement('li');
+    li.innerText = message;
+    ul.appendChild(li);
+
 }
 
-const handleOpen = () => {
-    console.log("socket open");
+const showRoom = (msg) => {
+    welcome.hidden = true;
+    room.hidden = false;
+    const h3 = room.querySelector('h3');
+    h3.innerText = `Room ${roomName}`;
 }
-socket.addEventListener('open', handleOpen )
 
-//메세지가 왔다!
-socket.addEventListener('message', (message) => {
-    const li = document.createElement("li");
-    li.innerText = message.data;
-    messageList.append(li);
-    console.log("New Message : ", message.data); 
-})
-
-//서버와 통신이 끊겼다.
-socket.addEventListener('close', () => {
-    console.log("Disconnected Server");    
-})
-
-//메세지를 보내기
-const handleSubmit = (e) => {
+const handleRoomSubmit = (e) => {
     e.preventDefault();
-    const input = messageForm.querySelector('input');
-    socket.send(makeMessage("new_message", input.value));
-    const li = document.createElement("li");
-    li.innerText = `You: ${input.value}`;
-    messageList.append(li);
-    input.value = "";
+    const input = form.querySelector('input');
+    socket.emit('enter_room', input.value, showRoom);
+    roomName = input.value;
 }
 
-//닉네임에 대해서
-const handleNickSubmit = (e) => {
-    e.preventDefault();
-    const input = nickForm.querySelector('input');
-    socket.send(makeMessage("nickname", input.value));
-    input.value = "";
-}
-messageForm.addEventListener('submit', handleSubmit)
-nickForm.addEventListener("submit", handleNickSubmit)
+form.addEventListener('submit', handleRoomSubmit);
+
+socket.on('welcome', () => {
+    addMessage("Someone Joined!");
+})

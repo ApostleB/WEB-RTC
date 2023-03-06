@@ -1,6 +1,7 @@
 import http from "http";
-import WebSocket from "ws";
 import express from "express";
+import SocketIO from "socket.io"
+
 const PORT = 3000;
 
 const app = express();
@@ -15,32 +16,47 @@ app.get('/',(req, res) => {
 
 const handleListen = () => console.log(`Listening on http://localhost:${PORT}`);
 
-const server =http.createServer(app);
-const wss = new WebSocket.Server({ server });
+const httpServer = http.createServer(app);
+const wsServer = SocketIO(httpServer);
 
-const onSocketClose = (socket) => {
-    console.log("Disconnected from the Browser X");
-}
-
-const sockets = [];
-
-wss.on('connection', (socket) => {
-    sockets.push(socket);
-    socket['nickname'] = 'anon';
-    console.log("connection to Brower");
-    socket.on('close', onSocketClose )
-
-    socket.on('message', (msg) => {
-        const message = JSON.parse(msg);
-        switch(message.type){
-            case "new_message":
-                sockets.forEach(aSocket => aSocket.send(`${socket.nickname}: ${message.payload}`));
-            case "nickname" :
-                socket['nickname'] = message.payload;
-                console.log(message.payload);
-        }
-    })
+wsServer.on('connection', (socket) => {
+    socket.onAny((e) => {
+        console.log(`socket Event:${e}`);
+    });
     
-});
+    socket.on('enter_room', async (roomName, done) => {
+        socket.join(roomName);
+        done();
+        socket.to(roomName).emit('welcome')
+    });
+})
 
-server.listen(PORT, handleListen);
+httpServer.listen(PORT, handleListen);
+
+
+// const wss = new WebSocket.Server({ server });
+
+// const onSocketClose = (socket) => {
+//     console.log("Disconnected from the Browser X");
+// }
+
+// const sockets = [];
+
+// wss.on('connection', (socket) => {
+//     sockets.push(socket);
+//     socket['nickname'] = 'anon';
+//     console.log("connection to Brower");
+//     socket.on('close', onSocketClose )
+
+//     socket.on('message', (msg) => {
+//         const message = JSON.parse(msg);
+//         switch(message.type){
+//             case "new_message":
+//                 sockets.forEach(aSocket => aSocket.send(`${socket.nickname}: ${message.payload}`));
+//             case "nickname" :
+//                 socket['nickname'] = message.payload;
+//                 console.log(message.payload);
+//         }
+//     })
+    
+// });

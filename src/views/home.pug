@@ -10,12 +10,15 @@ html(lang="en")
         header
             h1 It works!
         main 
-            h2 Welcome RTC
-            ul
-            form#nickname
-                input( type="text", placeholder="choos a nickname" require)
-                button Save
-            form#message
-                input( id="message" type="text", placeholder="wirte a msg" require)
-                button Send
+            div#welcome
+                form
+                    input(type="text", required, placeholder="Romm name")
+                    button Enter Room
+            div#room
+                h3
+                ul 
+                form
+                    input(type="text", required, placeholder= "message" )
+                    button Send
+        script(src="/socket.io/socket.io.js")
         script(src="/public/js/app.js")
